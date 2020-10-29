@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "197130991137",
+    "firebase_url": "https://kotlintestsuiteapi24db.firebaseio.com",
+    "project_id": "kotlintestsuiteapi24db",
+    "storage_bucket": "kotlintestsuiteapi24db.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:197130991137:android:b1be9e5413e9a181389560",
+        "android_client_info": {
+          "package_name": "com.example.kotlintestsuiteapi24"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "197130991137-32hv87r9rie7qa2j4ramrh0u8d1h0aj0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDjTQieet963yNWmcc3qmYC9SGFXrgHhH8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "197130991137-32hv87r9rie7qa2j4ramrh0u8d1h0aj0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -134,6 +134,7 @@ class TestScenario1Activity : AppCompatActivity() {
                     val msg = "Photo capture succeeded: $savedUri"
                     Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
                     Log.d(TAG, msg)
+                    println(savedUri)
                     // Upload to database here?
                 }
             })
