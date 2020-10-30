@@ -26,11 +26,22 @@ import java.nio.ByteBuffer
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ExecutorService
+import com.android.volley.Request
+import com.android.volley.Response
+import com.android.volley.toolbox.Volley
+import com.android.volley.toolbox.JsonObjectRequest
+import com.beust.klaxon.JsonArray
+import com.beust.klaxon.Parser
+import com.beust.klaxon.JsonObject
+import org.json.JSONException
 
 typealias LumaListener = (luma: Double) -> Unit
 
 class TestScenario1Activity : AppCompatActivity() {
     private var imageCapture: ImageCapture? = null
+
+    // API
+    val apiKey = "0a39e670ebc117a265e000dd2f5ef474"
 
     // Camera
     private lateinit var outputDirectory: File
@@ -83,6 +94,7 @@ class TestScenario1Activity : AppCompatActivity() {
 
     private fun takePhoto() {
 
+        val queue = Volley.newRequestQueue(this)
 
         //Request location permissions
         if (ActivityCompat.checkSelfPermission(
@@ -101,6 +113,34 @@ class TestScenario1Activity : AppCompatActivity() {
         fusedLocationClient.lastLocation
             .addOnSuccessListener { location: Location? ->
                 println(location)
+                // get weather data from location
+                val url =
+                    "https://api.openweathermap.org/data/2.5/weather?lat=${location?.latitude}&lon=${location?.longitude}&appid=${apiKey}"
+
+                try {
+                    val jsonObjectRequest = JsonObjectRequest(Request.Method.GET, url, null,
+
+                        // On Success
+                        Response.Listener {
+                            val parser: Parser = Parser.default()
+                            val stringBuilder: StringBuilder = StringBuilder(it.toString())
+                            val json: JsonObject = parser.parse(stringBuilder) as JsonObject
+                            val weatherArray =
+                                json.array<JsonObject>("weather") as JsonArray<JsonObject>
+                            val weather = weatherArray[0].string("main").toString()
+                            val city = json.string("name").toString()
+                            println(weather)
+                            println(city)
+                        },
+                        Response.ErrorListener {
+                            Toast.makeText(this, "something went wrong: $it", Toast.LENGTH_LONG)
+                                .show()
+                        })
+
+                    queue.add(jsonObjectRequest)
+                } catch (error: JSONException) {
+                    println(error)
+                }
                 Toast.makeText(this, location.toString(), Toast.LENGTH_LONG).show()
             }
 
