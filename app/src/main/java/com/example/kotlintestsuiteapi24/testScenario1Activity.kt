@@ -46,7 +46,6 @@ class TestScenario1Activity : AppCompatActivity() {
 
     // API
     val apiKey = "0a39e670ebc117a265e000dd2f5ef474"
-    var apiResponse :JSONObject = JSONObject()
 
     // Camera
     private lateinit var outputDirectory: File
