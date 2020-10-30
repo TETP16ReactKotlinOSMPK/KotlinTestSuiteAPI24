@@ -3,6 +3,7 @@ package com.example.kotlintestsuiteapi24
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.Manifest
+import android.app.DownloadManager
 import android.content.pm.PackageManager
 import android.graphics.drawable.BitmapDrawable
 import android.location.Location
@@ -17,11 +18,22 @@ import java.util.concurrent.Executors
 import androidx.camera.core.*
 import androidx.camera.core.ImageCapture
 import androidx.camera.lifecycle.ProcessCameraProvider
+import com.android.volley.Request
+import com.android.volley.Response
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
+import com.android.volley.toolbox.JsonObjectRequest
+import com.beust.klaxon.JsonArray
+import com.beust.klaxon.Parser
+import com.beust.klaxon.JsonObject
 import com.example.kotlintestsuiteapi24.R
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import kotlinx.android.synthetic.main.activity_testscenario1.*
+import org.json.JSONException
+import org.json.JSONObject
 import java.io.File
+import java.lang.StringBuilder
 import java.nio.ByteBuffer
 import java.text.SimpleDateFormat
 import java.util.*
@@ -31,6 +43,10 @@ typealias LumaListener = (luma: Double) -> Unit
 
 class TestScenario1Activity : AppCompatActivity() {
     private var imageCapture: ImageCapture? = null
+
+    // API
+    val apiKey = "0a39e670ebc117a265e000dd2f5ef474"
+    var apiResponse :JSONObject = JSONObject()
 
     // Camera
     private lateinit var outputDirectory: File
@@ -83,6 +99,7 @@ class TestScenario1Activity : AppCompatActivity() {
 
     private fun takePhoto() {
 
+        val queue = Volley.newRequestQueue(this)
 
         //Request location permissions
         if (ActivityCompat.checkSelfPermission(
@@ -98,12 +115,37 @@ class TestScenario1Activity : AppCompatActivity() {
             )
             return
         }
+        // if permitted, get location
         fusedLocationClient.lastLocation
             .addOnSuccessListener { location: Location? ->
                 println(location)
-                Toast.makeText(this, location.toString(), Toast.LENGTH_LONG).show()
-            }
+                // get weather data from location
+                val url = "https://api.openweathermap.org/data/2.5/weather?lat=${location?.latitude}&lon=${location?.longitude}&appid=${apiKey}"
 
+                try {
+                    val jsonObjectRequest = JsonObjectRequest(Request.Method.GET, url, null,
+
+                        // On Success
+                        Response.Listener {
+                            val parser: Parser = Parser.default()
+                            val stringBuilder: StringBuilder = StringBuilder(it.toString())
+                            val json: JsonObject = parser.parse(stringBuilder) as JsonObject
+                            val weatherArray = json.array<JsonObject>("weather") as JsonArray<JsonObject>
+                            val weather = weatherArray[0].string("main").toString()
+                            val city = json.string("name").toString()
+                            println(weather)
+                            println(city)
+                        },
+                        Response.ErrorListener {
+                            Toast.makeText(this, "something went wrong: $it", Toast.LENGTH_LONG).show()
+                        })
+
+                    queue.add(jsonObjectRequest)
+                } catch (error: JSONException){
+                    println(error)
+                }
+
+            }
 
         // Get a stable reference of the modifiable image capture use case
         val imageCapture = imageCapture ?: return
@@ -134,7 +176,9 @@ class TestScenario1Activity : AppCompatActivity() {
                     val msg = "Photo capture succeeded: $savedUri"
                     Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
                     Log.d(TAG, msg)
-                    // Upload to database here?
+                    // Upload to database and get weather data here
+
+
                 }
             })
     }
