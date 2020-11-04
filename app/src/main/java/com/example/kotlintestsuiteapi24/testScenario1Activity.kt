@@ -4,11 +4,8 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.Manifest
 import android.content.pm.PackageManager
-import android.graphics.drawable.BitmapDrawable
 import android.location.Location
 import android.net.Uri
-import android.provider.MediaStore
-import android.provider.MediaStore.Images.Media.insertImage
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
@@ -17,7 +14,6 @@ import java.util.concurrent.Executors
 import androidx.camera.core.*
 import androidx.camera.core.ImageCapture
 import androidx.camera.lifecycle.ProcessCameraProvider
-import com.example.kotlintestsuiteapi24.R
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import kotlinx.android.synthetic.main.activity_testscenario1.*
@@ -33,12 +29,25 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.beust.klaxon.JsonArray
 import com.beust.klaxon.Parser
 import com.beust.klaxon.JsonObject
+import com.google.firebase.FirebaseApp
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.IgnoreExtraProperties
+import com.google.firebase.database.ktx.database
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import org.json.JSONException
 
 typealias LumaListener = (luma: Double) -> Unit
 
 class TestScenario1Activity : AppCompatActivity() {
-    private var imageCapture: ImageCapture? = null
+
+    // Create reference to firebase
+    val db = Firebase.firestore
+
+    var weatherValue = ""
+    var cityValue = ""
+    var latitudeValue = 0.0
+    var longitudeValue = 0.0
 
     // API
     val apiKey = "0a39e670ebc117a265e000dd2f5ef474"
@@ -46,12 +55,14 @@ class TestScenario1Activity : AppCompatActivity() {
     // Camera
     private lateinit var outputDirectory: File
     private lateinit var cameraExecutor: ExecutorService
+    private var imageCapture: ImageCapture? = null
 
     // GPS
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        FirebaseApp.initializeApp(this)
         setContentView(R.layout.activity_testscenario1)
 
         // Create instance of location provider client
@@ -131,6 +142,10 @@ class TestScenario1Activity : AppCompatActivity() {
                             val city = json.string("name").toString()
                             println(weather)
                             println(city)
+                            weatherValue = weather
+                            cityValue = city
+                            latitudeValue = location!!.latitude
+                            longitudeValue = location!!.longitude
                         },
                         Response.ErrorListener {
                             Toast.makeText(this, "something went wrong: $it", Toast.LENGTH_LONG)
@@ -174,8 +189,24 @@ class TestScenario1Activity : AppCompatActivity() {
                     val msg = "Photo capture succeeded: $savedUri"
                     Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
                     Log.d(TAG, msg)
-                    println(savedUri)
-                    // Upload to database here?
+
+                    // Upload to database
+                    val photo = hashMapOf(
+                        "city" to cityValue,
+                        "latitude" to latitudeValue,
+                        "longitude" to longitudeValue,
+                        "photo" to photoFile.absolutePath,
+                        "weather" to weatherValue
+                    )
+
+                    db.collection("photos")
+                        .add(photo)
+                        .addOnSuccessListener { documentReference ->
+                            Log.d(TAG, "DocumentSnapShot added with ID: ${documentReference.id}")
+                        }
+                        .addOnFailureListener { e ->
+                            Log.w(TAG, "Error adding document", e)
+                        }
                 }
             })
     }
