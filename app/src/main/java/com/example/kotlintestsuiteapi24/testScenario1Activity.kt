@@ -103,6 +103,9 @@ class TestScenario1Activity : AppCompatActivity() {
         }
     }
 
+    private fun textMsg(){
+        print("Hello")
+    }
     private fun takePhoto() {
 
         val queue = Volley.newRequestQueue(this)
@@ -273,6 +276,7 @@ class TestScenario1Activity : AppCompatActivity() {
         super.onDestroy()
         cameraExecutor.shutdown()
     }
+
 
     companion object {
         private const val TAG = "CameraXBasic"
