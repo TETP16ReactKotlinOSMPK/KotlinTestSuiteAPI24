@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.Manifest
 import android.content.pm.PackageManager
 import android.location.Location
+import android.media.MediaPlayer
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
@@ -43,7 +44,9 @@ class TestScenario1Activity : AppCompatActivity() {
 
     // Create reference to firebase
     val db = Firebase.firestore
+    val mediaPlayer: MediaPlayer? = null
 
+    var resId = getResources().getIdentifier(R.raw.AudioFileBeethoven.toString(), "raw", packageName)
     var weatherValue = ""
     var cityValue = ""
     var latitudeValue = 0.0
@@ -71,6 +74,7 @@ class TestScenario1Activity : AppCompatActivity() {
         // Request camera permissions
         if (allPermissionsGrantedCamera()) {
             startCamera()
+            playAudioFile()
         } else {
             ActivityCompat.requestPermissions(
                 this, REQUIRED_PERMISSIONS_CAMERA, REQUEST_CODE_PERMISSIONS
@@ -103,8 +107,10 @@ class TestScenario1Activity : AppCompatActivity() {
         }
     }
 
-    private fun textMsg(){
-        print("Hello")
+    private fun playAudioFile(){
+        mediaPlayer?.setDataSource(R.raw.AudioFileBeethoven.toString())
+        mediaPlayer?.start()
+
     }
     private fun takePhoto() {
 
