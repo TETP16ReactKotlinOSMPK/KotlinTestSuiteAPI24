@@ -46,7 +46,7 @@ class TestScenario1Activity : AppCompatActivity() {
     val db = Firebase.firestore
     val mediaPlayer: MediaPlayer? = null
 
-    var resId = getResources().getIdentifier(R.raw.AudioFileBeethoven.toString(), "raw", packageName)
+    var resId = getResources().getIdentifier(R.raw.bugle.toString(), "raw", packageName)
     var weatherValue = ""
     var cityValue = ""
     var latitudeValue = 0.0
@@ -108,7 +108,7 @@ class TestScenario1Activity : AppCompatActivity() {
     }
 
     private fun playAudioFile(){
-        mediaPlayer?.setDataSource(R.raw.AudioFileBeethoven.toString())
+        mediaPlayer?.setDataSource(R.raw.bugle.toString())
         mediaPlayer?.start()
 
     }
