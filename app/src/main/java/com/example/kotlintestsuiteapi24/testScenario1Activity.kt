@@ -44,9 +44,7 @@ class TestScenario1Activity : AppCompatActivity() {
 
     // Create reference to firebase
     val db = Firebase.firestore
-    val mediaPlayer: MediaPlayer? = null
-
-    var resId = getResources().getIdentifier(R.raw.bugle.toString(), "raw", packageName)
+    var mediaPlayer: MediaPlayer? = null
     var weatherValue = ""
     var cityValue = ""
     var latitudeValue = 0.0
@@ -67,7 +65,6 @@ class TestScenario1Activity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         FirebaseApp.initializeApp(this)
         setContentView(R.layout.activity_testscenario1)
-
         // Create instance of location provider client
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
@@ -75,6 +72,7 @@ class TestScenario1Activity : AppCompatActivity() {
         if (allPermissionsGrantedCamera()) {
             startCamera()
             playAudioFile()
+
         } else {
             ActivityCompat.requestPermissions(
                 this, REQUIRED_PERMISSIONS_CAMERA, REQUEST_CODE_PERMISSIONS
@@ -108,7 +106,7 @@ class TestScenario1Activity : AppCompatActivity() {
     }
 
     private fun playAudioFile(){
-        mediaPlayer?.setDataSource(R.raw.bugle.toString())
+        mediaPlayer = MediaPlayer.create(this, R.raw.bugle)
         mediaPlayer?.start()
 
     }
