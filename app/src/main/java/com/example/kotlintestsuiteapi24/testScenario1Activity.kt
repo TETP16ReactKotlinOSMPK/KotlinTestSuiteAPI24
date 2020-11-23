@@ -217,7 +217,9 @@ class TestScenario1Activity : AppCompatActivity() {
                 }
             })
     }
+    private fun searchForBLEDevices(){
 
+    }
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
 
