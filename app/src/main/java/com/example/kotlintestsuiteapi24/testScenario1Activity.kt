@@ -1,42 +1,47 @@
 package com.example.kotlintestsuiteapi24
 
-import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
 import android.Manifest
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothSocket
 import android.content.pm.PackageManager
 import android.location.Location
 import android.media.MediaPlayer
 import android.net.Uri
+import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageCapture
+import androidx.camera.core.ImageCaptureException
+import androidx.camera.core.Preview
+import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import java.util.concurrent.Executors
-import androidx.camera.core.*
-import androidx.camera.core.ImageCapture
-import androidx.camera.lifecycle.ProcessCameraProvider
+import com.android.volley.Request
+import com.android.volley.Response
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
+import com.beust.klaxon.JsonArray
+import com.beust.klaxon.JsonObject
+import com.beust.klaxon.Parser
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.firebase.FirebaseApp
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.activity_testscenario1.*
+import okio.Utf8
+import org.json.JSONException
 import java.io.File
-import java.nio.ByteBuffer
+import java.io.IOException
+import java.io.OutputStream
+import java.nio.charset.Charset
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ExecutorService
-import com.android.volley.Request
-import com.android.volley.Response
-import com.android.volley.toolbox.Volley
-import com.android.volley.toolbox.JsonObjectRequest
-import com.beust.klaxon.JsonArray
-import com.beust.klaxon.Parser
-import com.beust.klaxon.JsonObject
-import com.google.firebase.FirebaseApp
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.IgnoreExtraProperties
-import com.google.firebase.database.ktx.database
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
-import org.json.JSONException
+import java.util.concurrent.Executors
 
 typealias LumaListener = (luma: Double) -> Unit
 
@@ -61,6 +66,16 @@ class TestScenario1Activity : AppCompatActivity() {
     // GPS
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
+    // UUID
+    var uuid:UUID = UUID.fromString("f0d60c98-748e-4179-a962-d3111033c098")
+    val btAdress = "94:E9:79:E4:09:50"
+    // Bluetooth
+    lateinit var bAdapter:BluetoothAdapter
+    lateinit var btSocket:BluetoothSocket
+    lateinit var device:BluetoothDevice
+    lateinit var out:OutputStream
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         FirebaseApp.initializeApp(this)
@@ -68,10 +83,14 @@ class TestScenario1Activity : AppCompatActivity() {
         // Create instance of location provider client
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
+        //bluetooth
+        bAdapter = BluetoothAdapter.getDefaultAdapter()
+
         // Request camera permissions
         if (allPermissionsGrantedCamera()) {
             startCamera()
             playAudioFile()
+            connectBt()
 
         } else {
             ActivityCompat.requestPermissions(
@@ -102,6 +121,31 @@ class TestScenario1Activity : AppCompatActivity() {
                 ).show()
                 finish()
             }
+        }
+    }
+
+
+    private fun connectBt(){
+        device = bAdapter.getRemoteDevice(btAdress)
+
+        try {
+            btSocket = device.createInsecureRfcommSocketToServiceRecord(uuid)
+        } catch (e: java.lang.Exception) {
+            Toast.makeText(applicationContext, "Could not connect to socket", Toast.LENGTH_LONG)
+        }
+        bAdapter.cancelDiscovery()
+        try {
+            btSocket.connect()
+
+        } catch (e: IOException) {
+            Toast.makeText(applicationContext, "Could not connect to socket", Toast.LENGTH_LONG) }
+        try {
+            out = btSocket.outputStream
+            val msg = "Hello world".toByteArray(Charsets.UTF_8)
+            out.write(msg)
+            Toast.makeText(applicationContext, "Message sent", Toast.LENGTH_LONG).show()
+        } catch (a: java.lang.Exception) {
+            Toast.makeText(applicationContext, "Could not send msg", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -217,9 +261,7 @@ class TestScenario1Activity : AppCompatActivity() {
                 }
             })
     }
-    private fun searchForBLEDevices(){
 
-    }
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
 
