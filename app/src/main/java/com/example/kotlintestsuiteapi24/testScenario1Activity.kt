@@ -54,6 +54,7 @@ class TestScenario1Activity : AppCompatActivity() {
     var cityValue = ""
     var latitudeValue = 0.0
     var longitudeValue = 0.0
+    var sendData = true
 
     // API
     val apiKey = "0a39e670ebc117a265e000dd2f5ef474"
@@ -68,7 +69,7 @@ class TestScenario1Activity : AppCompatActivity() {
 
     // UUID
     var uuid:UUID = UUID.fromString("f0d60c98-748e-4179-a962-d3111033c098")
-    val btAdress = "94:E9:79:E4:09:50"
+    val btAdress = "A0:C5:89:14:12:8D"
     // Bluetooth
     lateinit var bAdapter:BluetoothAdapter
     lateinit var btSocket:BluetoothSocket
@@ -125,7 +126,9 @@ class TestScenario1Activity : AppCompatActivity() {
     }
 
 
+
     private fun connectBt(){
+
         device = bAdapter.getRemoteDevice(btAdress)
 
         try {
@@ -140,17 +143,21 @@ class TestScenario1Activity : AppCompatActivity() {
         } catch (e: IOException) {
             Toast.makeText(applicationContext, "Could not connect to socket", Toast.LENGTH_LONG) }
         try {
-            out = btSocket.outputStream
-            val msg = "Hello world".toByteArray(Charsets.UTF_8)
-            out.write(msg)
-            Toast.makeText(applicationContext, "Message sent", Toast.LENGTH_LONG).show()
+            Thread(Runnable {
+                while (sendData) {
+                    out = btSocket.outputStream
+                    val msg = "Hello world".toByteArray(Charsets.UTF_8)
+                    out.write(msg)
+                    Toast.makeText(applicationContext, "Message sent", Toast.LENGTH_LONG).show()
+                }
+            }).start()
         } catch (a: java.lang.Exception) {
             Toast.makeText(applicationContext, "Could not send msg", Toast.LENGTH_LONG).show()
         }
     }
 
     private fun playAudioFile(){
-        mediaPlayer = MediaPlayer.create(this, R.raw.bugle)
+        mediaPlayer = MediaPlayer.create(this, R.raw.song)
         mediaPlayer?.start()
 
     }
@@ -323,6 +330,7 @@ class TestScenario1Activity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         cameraExecutor.shutdown()
+        sendData = false
     }
 
 
