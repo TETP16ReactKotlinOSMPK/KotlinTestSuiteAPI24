@@ -51,7 +51,7 @@ class TestScenario1Activity : AppCompatActivity() {
     var longitudeValue = 0.0
 
     // API
-    val apiKey = "0a39e670ebc117a265e000dd2f5ef474"
+    val apiKey = "xxxxx"
 
     // Camera
     private lateinit var outputDirectory: File
