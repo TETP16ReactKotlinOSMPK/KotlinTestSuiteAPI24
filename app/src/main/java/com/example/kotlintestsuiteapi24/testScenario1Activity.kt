@@ -45,7 +45,7 @@ class TestScenario1Activity : AppCompatActivity() {
     private var imageCapture: ImageCapture? = null
 
     // API
-    val apiKey = "0a39e670ebc117a265e000dd2f5ef474"
+    val apiKey = "xxxxx"
 
     // Camera
     private lateinit var outputDirectory: File
